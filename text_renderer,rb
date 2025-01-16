@@ -1,0 +1,85 @@
+#!/usr/bin/env ruby
+
+selection = rand(1..4)
+
+y = 1
+r = 1
+c = 1
+p = 1
+
+colorYellow = "\e[1;93m"
+colorRed = "\e[1;91m"
+colorCyan = "\e[1;96m"
+colorPurple = "\e[1;95m"
+
+
+options = {
+y: colorYellow,
+r: colorRed,
+c: colorCyan,
+p: colorPurple,
+}
+
+if selection == 1
+    $colorSelection = options[:y]
+elsif selection == 2
+  $colorSelection = options[:r]
+elsif selection == 3
+  $colorSelection = options[:c]
+elsif selection == 4
+  $colorSelection = options[:p]
+end
+
+class TextRenderer
+  def initialize(options = {})
+    @typing_speed = options[:speed] || 0.05  # Seconds between characters
+    @line_pause = options[:line_pause] || 0.5 # Pause between lines
+    @cursor = "▋"
+  end
+
+  def render_file(filename)
+    begin
+      text = File.read(filename)
+      render_text(text)
+    rescue Errno::ENOENT
+      puts "Error: File '#{filename}' not found."
+    end
+  end
+
+  def render_text(text)
+    # Clear screen and move to top
+    print $colorSelection
+    
+    text.each_line do |line|
+      render_line(line)
+      sleep @line_pause
+    end
+  end
+
+  private
+
+  def render_line(line)
+    line.each_char do |char|
+      print $colorYellow
+      print char
+      print @cursor
+      $stdout.flush  # Ensure immediate output
+      sleep @typing_speed
+      print "\b \b"  # Remove cursor
+    end
+    print "\n"
+  end
+end
+
+# Command line interface
+if __FILE__ == $0
+  if ARGV.empty?
+    puts "Usage: #{$0} <filename> [speed]"
+    exit 1
+  end
+
+  speed = ARGV[1]&.to_f || 0.05
+  renderer = TextRenderer.new(speed: speed)
+  renderer.render_file(ARGV[0])
+end
+
