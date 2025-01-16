@@ -60,7 +60,7 @@ class TextRenderer
 
   def render_line(line)
     line.each_char do |char|
-      print $colorYellow
+    
       print char
       print @cursor
       $stdout.flush  # Ensure immediate output
